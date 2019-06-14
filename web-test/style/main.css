@@ -1,0 +1,68 @@
+@font-face {
+    font-family: oldibm;
+    src: url('fonts/Px437_IBM_VGA8.ttf');
+}
+
+@font-face {
+    font-family: oldibmfat;
+    src: url('fonts/Px437_IBM_VGA9.ttf');
+}
+
+body {
+    background-color: #000000;
+    color: #eee;
+    line-height: 100%;
+}
+
+#mainColumn {
+    padding: 0.2em 1.5ch;
+    background-color: #181818;
+    max-width: 1000px;
+    color: #d8ff55;
+    margin: 30px auto auto auto;
+    font-family: oldibm;
+}
+
+#mainColumn h1 {
+    color: #cc6600;
+    font-family: oldibm;
+}
+
+#mainColumn hr {
+    color: #cc6600;
+    background-color: #cc6600;
+}
+
+#mainColumn .raised {
+    background-color: #2a2a2a;
+    color: #1d91aa;
+    padding: 1px;
+    box-shadow: inset 0 0 0 2px #cc6600
+}
+
+#mainColumn p {
+    font-size: 12pt;
+    line-height: 110%;
+    color: #E6E6E6;
+}
+
+#columnFooter {
+    background-color: #2a2a2a;
+    padding: 8px;
+    margin: -0.2em -1.5ch -0.2em -1.5ch;
+    color: #cc6600;
+}
+
+#columnFooter a {
+    float: right;
+	margin-left: 10px;
+}
+
+a {
+    color: gold;
+    text-decoration: none;
+}
+
+a:hover {
+    color: khaki;
+}
