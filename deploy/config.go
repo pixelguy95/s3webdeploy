@@ -1,7 +1,8 @@
-package config
+package deploy
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 )
 
@@ -15,8 +16,21 @@ type StaticWebConfig struct {
 // LoadConfigurations loads the configurations from the file given and
 // returns the struct
 func LoadConfigurations(fileName string) *StaticWebConfig {
-	file, _ := ioutil.ReadFile(fileName)
+	file, err := ioutil.ReadFile(fileName)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
 	data := StaticWebConfig{}
-	_ = json.Unmarshal([]byte(file), &data)
+	err = json.Unmarshal([]byte(file), &data)
+
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	data.DomainName = "www." + data.DomainName
 	return &data
 }

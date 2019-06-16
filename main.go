@@ -4,20 +4,26 @@ import (
 	"flag"
 	"fmt"
 	"log"
+
+	"github.com/pixelguy95/deploy-static-web/deploy"
 )
 
 func main() {
 
 	optPtr := flag.String("opt", "", "What the program should do, setup, update, cleanup")
 	configPtr := flag.String("config", "./config.json", "Path of the config file, defaults to ./config.json")
-	webFolderPtr := flag.String("folder", "", "Path of the folder you want to upload")
 
 	flag.Parse()
 
-	if *optPtr == "" || *webFolderPtr == "" {
-		log.Fatal("opt and folder flags needs to be set")
+	if *optPtr == "" {
+		log.Fatal("opt flags needs to be set, valid option are setup, update, and cleanup")
+		fmt.Printf("%s\n", *configPtr)
 		return
 	}
 
-	fmt.Printf("%s\n", *configPtr)
+	conf := deploy.LoadConfigurations("./config.json")
+	fmt.Println(conf)
+
+	deploy.Setup(conf)
+	//deploy.Cleanup(conf)
 }
