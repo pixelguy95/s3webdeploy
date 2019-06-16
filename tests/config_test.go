@@ -1,5 +1,10 @@
 package tests
 
-func TestLoadConfigFile() {
+import (
+	"testing"
+)
+
+func TestLoadConfigFile(t *testing.T) {
+	config := LoadConfigurations("./config.json")
 
 }
