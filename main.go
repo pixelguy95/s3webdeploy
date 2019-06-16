@@ -25,5 +25,5 @@ func main() {
 	fmt.Println(conf)
 
 	deploy.Setup(conf)
-	//deploy.Cleanup(conf)
+	deploy.Cleanup(conf)
 }
