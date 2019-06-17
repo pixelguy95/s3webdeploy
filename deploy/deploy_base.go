@@ -16,6 +16,7 @@ func Setup(config *StaticWebConfig) error {
 	CreateBucket(config, s3Session)
 	SetBucketPermissions(config, s3Session)
 	CreateBucketWebsite(config, s3Session)
+	UploadWebFolder(config, sess)
 	return nil
 }
 
