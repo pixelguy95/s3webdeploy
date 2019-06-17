@@ -1,6 +1,8 @@
 package deploy
 
 import (
+	"log"
+
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -18,8 +20,13 @@ func Setup(config *StaticWebConfig) error {
 	CreateBucket(config, s3Session)
 	SetBucketPermissions(config, s3Session)
 	CreateBucketWebsite(config, s3Session)
+
+	DNSname, _ := ExtractBucketWebsiteUrl(config, s3Session)
+
+	log.Println(*DNSname)
+
 	UploadWebFolder(config, sess)
-	CreateCNameRecord(config, route53Session, &AliasConfig{DNSName: "blah"})
+	CreateCNameRecord(config, route53Session, &AliasConfig{DNSName: *DNSname})
 	return nil
 }
 
