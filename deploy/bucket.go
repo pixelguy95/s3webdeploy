@@ -130,6 +130,16 @@ func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 	return nil
 }
 
+func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) error {
+	output, err := s3Session.GetBucketWebsite(&s3.GetBucketWebsiteInput{
+		Bucket: aws.String(config.DomainName),
+	})
+	fmt.Println(output.String())
+	fmt.Println(err)
+
+	return nil
+}
+
 // DestroyBucket destroys the hosting bucket.
 func DestroyBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 
