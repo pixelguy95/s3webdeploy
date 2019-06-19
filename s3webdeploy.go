@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pixelguy95/deploy-static-web/deploy"
+	"github.com/pixelguy95/s3webdeploy/deploy"
 )
 
 func main() {
