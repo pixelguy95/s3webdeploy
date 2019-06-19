@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -28,7 +27,7 @@ func CreateBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 		Bucket: aws.String(config.BucketName),
 	})
 
-	log.Printf("Bucket %s has been created", config.BucketName)
+	fmt.Printf("Bucket %s has been created", config.BucketName)
 
 	return nil
 }
@@ -48,7 +47,7 @@ func SetBucketPermissions(config *StaticWebConfig, s3Session *s3.S3) error {
 		return err
 	}
 
-	log.Print("Bucket reading permission set to public")
+	fmt.Print("Bucket reading permission set to public")
 
 	return nil
 }
@@ -57,6 +56,7 @@ func UploadWebFolder(config *StaticWebConfig, sess *session.Session) error {
 
 	uploader := s3manager.NewUploader(sess)
 
+	fmt.Printf("Uploading %s folder to bucket, with proper content configurations\n", config.WebFolder)
 	err := filepath.Walk(config.WebFolder,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -95,13 +95,13 @@ func UploadWebFolder(config *StaticWebConfig, sess *session.Session) error {
 			})
 
 			if err == nil {
-				log.Printf("%s", key)
+				fmt.Printf("%s\n", key)
 			}
 
 			return nil
 		})
 	if err != nil {
-		log.Println(err)
+		fmt.Println(err)
 	}
 
 	return nil
@@ -124,7 +124,7 @@ func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 		fmt.Printf("An error occured while making the website bucket: %s, %s", err, output)
 	}
 
-	log.Print("Bucket has been made into website")
+	fmt.Print("Bucket has been made into website")
 
 	return nil
 }
@@ -171,7 +171,7 @@ func DestroyBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 		Bucket: aws.String(config.BucketName),
 	})
 
-	log.Printf("Bucket %s has been destroyed", config.BucketName)
+	fmt.Printf("Bucket %s has been destroyed", config.BucketName)
 
 	return nil
 }

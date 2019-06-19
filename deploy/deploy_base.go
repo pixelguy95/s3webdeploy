@@ -1,7 +1,7 @@
 package deploy
 
 import (
-	"log"
+	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/route53"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -17,16 +17,20 @@ func Setup(config *StaticWebConfig) error {
 
 	s3Session := s3.New(sess)
 	route53Session := route53.New(sess)
+
+	fmt.Println("Creating bucket")
 	err = CreateBucket(config, s3Session)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("Setting bucket permissions")
 	err = SetBucketPermissions(config, s3Session)
 	if err != nil {
 		return err
 	}
 
+	fmt.Println("Creating bucket website")
 	err = CreateBucketWebsite(config, s3Session)
 	if err != nil {
 		return err
@@ -34,7 +38,9 @@ func Setup(config *StaticWebConfig) error {
 
 	url, region, _ := ExtractBucketWebsiteUrl(config, s3Session)
 
-	log.Println(*url, *region, S3BucketHostedZoneMap[*region])
+	fmt.Println("Bucket website now operating @")
+	fmt.Println(*url)
+	fmt.Printf("In region %s, with the hosted zone id %s\n", *region, S3BucketHostedZoneMap[*region])
 
 	err = UploadWebFolder(config, sess)
 	if err != nil {

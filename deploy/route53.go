@@ -2,7 +2,6 @@ package deploy
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/route53"
@@ -51,6 +50,10 @@ var S3BucketHostedZoneMap = map[string]string{
 
 func CreateCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, aliasConfig *AliasConfig) {
 
+	fmt.Printf("Creating CNAME record with the name %s\n", conf.BucketName)
+	fmt.Printf("Bucket in region %s, thus given hosted zone id %s\n", conf.Region, S3BucketHostedZoneMap[aliasConfig.Region])
+	fmt.Printf("CNAME alias target %s\n", aliasConfig.DNSName)
+
 	change := &route53.Change{
 		ResourceRecordSet: &route53.ResourceRecordSet{
 
@@ -77,7 +80,7 @@ func CreateCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, a
 		fmt.Println(err)
 	}
 
-	log.Println("Created cname record")
+	fmt.Println("Created cname record")
 }
 
 func DeleteCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, aliasConfig *AliasConfig) {
@@ -108,5 +111,5 @@ func DeleteCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, a
 		fmt.Println(err)
 	}
 
-	log.Println("Deleted cname record")
+	fmt.Println("Deleted cname record")
 }

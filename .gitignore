@@ -13,3 +13,4 @@
 
 # Don't upload config file
 config.json
+bad-config.json

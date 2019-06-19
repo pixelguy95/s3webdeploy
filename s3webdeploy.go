@@ -18,34 +18,58 @@ func main() {
 		return
 	}
 
-	fmt.Println("First option: " + os.Args[1])
-	fmt.Println("Second option: " + os.Args[2])
+	option := strings.ToLower(os.Args[1])
 
-	if os.Args[1] == "create" {
-
-	}
-
-	conf := deploy.LoadConfigurations("./config.json")
-
-	if conf == nil {
+	if option != "create" && option != "delete" && option != "update" {
+		fmt.Printf("Unknown option %s, accepted options are create, update, delet\n", option)
 		return
 	}
 
-	err := conf.SanityCheck()
+	conf, err := handleConfigFile(option)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("%v\n", err)
 		return
 	}
 
-	fmt.Println(conf)
+	if option == deploy.CREATE {
+		err = deploy.Setup(conf)
+		if err != nil {
+			if strings.HasPrefix(err.Error(), "BucketAlreadyOwnedByYou") {
+				fmt.Println("You have already created this bucket")
+			}
 
-	err = deploy.Setup(conf)
-	if err != nil {
-		if strings.HasPrefix(err.Error(), "BucketAlreadyOwnedByYou") {
-			fmt.Println("You have already created this bucket")
+			fmt.Printf("%v\n", err)
 		}
 
-		fmt.Printf("%v\n", err)
+		fmt.Println("SUCCSESS!")
+		fmt.Println("It might take a few minutes before DNS updates")
+
+	} else if option == deploy.DELETE {
+		deploy.Cleanup(conf)
+	} else if option == deploy.UPDATE {
+		fmt.Println("update has not yet been implemented")
 	}
-	//deploy.Cleanup(conf)
+
+}
+
+func handleConfigFile(option string) (*deploy.StaticWebConfig, error) {
+	confFile := "./config.json"
+	if len(os.Args) == 3 {
+		confFile = os.Args[2]
+	} else {
+		fmt.Println("No config file given, using default value './config.json")
+	}
+
+	conf, err := deploy.LoadConfigurations(confFile)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = conf.SanityCheck(option)
+	if err != nil {
+		return nil, err
+	}
+
+	return conf, err
 }
