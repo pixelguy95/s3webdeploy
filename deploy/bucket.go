@@ -124,12 +124,15 @@ func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 		fmt.Printf("An error occured while making the website bucket: %s, %s", err, output)
 	}
 
-	fmt.Print("Bucket has been made into website")
+	fmt.Println("Bucket has been made into website")
 
 	return nil
 }
 
 // {bucket}.s3-website-<RegionName>.amazonaws.com
+// eu-west-1
+// us-west-1
+// us-west-2
 func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) (*string, *string, error) {
 	output, err := s3Session.GetBucketLocation(&s3.GetBucketLocationInput{
 		Bucket: aws.String(config.BucketName),
