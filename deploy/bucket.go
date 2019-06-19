@@ -17,19 +17,18 @@ import (
 func CreateBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 
 	_, err := s3Session.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 	})
 
 	if err != nil {
-		fmt.Printf("Unable to create bucket %q, %v", config.DomainName, err)
 		return err
 	}
 
 	s3Session.WaitUntilBucketExists(&s3.HeadBucketInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 	})
 
-	log.Printf("Bucket %s has been created", config.DomainName)
+	log.Printf("Bucket %s has been created", config.BucketName)
 
 	return nil
 }
@@ -40,12 +39,12 @@ const PolicyJson = "{\"Version\": \"2008-10-17\",\"Id\": \"PolicyForPublicWebsit
 func SetBucketPermissions(config *StaticWebConfig, s3Session *s3.S3) error {
 
 	_, err := s3Session.PutBucketPolicy(&s3.PutBucketPolicyInput{
-		Bucket: aws.String(config.DomainName),
-		Policy: aws.String(strings.Replace(PolicyJson, "[BUCKETNAMEHERE]", config.DomainName, 1)),
+		Bucket: aws.String(config.BucketName),
+		Policy: aws.String(strings.Replace(PolicyJson, "[BUCKETNAMEHERE]", config.BucketName, 1)),
 	})
 
 	if err != nil {
-		fmt.Printf("Unable to update policy bucket %s, %v", config.DomainName, err)
+		fmt.Printf("Unable to update policy bucket %s, %v", config.BucketName, err)
 		return err
 	}
 
@@ -89,7 +88,7 @@ func UploadWebFolder(config *StaticWebConfig, sess *session.Session) error {
 			}
 
 			_, err = uploader.Upload(&s3manager.UploadInput{
-				Bucket:      aws.String(config.DomainName),
+				Bucket:      aws.String(config.BucketName),
 				Key:         aws.String(key),
 				Body:        fileContent,
 				ContentType: aws.String(contentType),
@@ -110,7 +109,7 @@ func UploadWebFolder(config *StaticWebConfig, sess *session.Session) error {
 
 func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 	output, err := s3Session.PutBucketWebsite(&s3.PutBucketWebsiteInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 		WebsiteConfiguration: &s3.WebsiteConfiguration{
 			IndexDocument: &s3.IndexDocument{
 				Suffix: aws.String("index.html"),
@@ -131,48 +130,48 @@ func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 }
 
 // {bucket}.s3-website-<RegionName>.amazonaws.com
-func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) (*string, error) {
+func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) (*string, *string, error) {
 	output, err := s3Session.GetBucketLocation(&s3.GetBucketLocationInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 	})
 
 	if err != nil {
 		fmt.Println(err)
-		return nil, err
+		return nil, nil, err
 	}
 
-	url := config.DomainName + ".s3-website-" + *output.LocationConstraint + ".amazonaws.com"
-	return &url, nil
+	url := config.BucketName + ".s3-website-" + *output.LocationConstraint + ".amazonaws.com"
+	return &url, output.LocationConstraint, nil
 }
 
 // DestroyBucket destroys the hosting bucket.
 func DestroyBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 
 	list, err := s3Session.ListObjects(&s3.ListObjectsInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 	})
 
 	for _, l := range list.Contents {
 		s3Session.DeleteObject(&s3.DeleteObjectInput{
-			Bucket: aws.String(config.DomainName),
+			Bucket: aws.String(config.BucketName),
 			Key:    l.Key,
 		})
 	}
 
 	_, err = s3Session.DeleteBucket(&s3.DeleteBucketInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 	})
 
 	if err != nil {
-		fmt.Printf("Unable to destroy bucket %q, %v", config.DomainName, err)
+		fmt.Printf("Unable to destroy bucket %q, %v", config.BucketName, err)
 		return err
 	}
 
 	s3Session.WaitUntilBucketNotExists(&s3.HeadBucketInput{
-		Bucket: aws.String(config.DomainName),
+		Bucket: aws.String(config.BucketName),
 	})
 
-	log.Printf("Bucket %s has been destroyed", config.DomainName)
+	log.Printf("Bucket %s has been destroyed", config.BucketName)
 
 	return nil
 }

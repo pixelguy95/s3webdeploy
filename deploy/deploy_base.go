@@ -17,16 +17,32 @@ func Setup(config *StaticWebConfig) error {
 
 	s3Session := s3.New(sess)
 	route53Session := route53.New(sess)
-	CreateBucket(config, s3Session)
-	SetBucketPermissions(config, s3Session)
-	CreateBucketWebsite(config, s3Session)
+	err = CreateBucket(config, s3Session)
+	if err != nil {
+		return err
+	}
 
-	DNSname, _ := ExtractBucketWebsiteUrl(config, s3Session)
+	err = SetBucketPermissions(config, s3Session)
+	if err != nil {
+		return err
+	}
 
-	log.Println(*DNSname)
+	err = CreateBucketWebsite(config, s3Session)
+	if err != nil {
+		return err
+	}
 
-	UploadWebFolder(config, sess)
-	CreateCNameRecord(config, route53Session, &AliasConfig{DNSName: *DNSname})
+	url, region, _ := ExtractBucketWebsiteUrl(config, s3Session)
+
+	log.Println(*url, *region, S3BucketHostedZoneMap[*region])
+
+	err = UploadWebFolder(config, sess)
+	if err != nil {
+		return err
+	}
+
+	CreateCNameRecord(config, route53Session, &AliasConfig{DNSName: *url, Region: *region})
+
 	return nil
 }
 
@@ -39,6 +55,11 @@ func Cleanup(config *StaticWebConfig) error {
 	}
 
 	s3Session := s3.New(sess)
+	route53Session := route53.New(sess)
+
+	url, region, _ := ExtractBucketWebsiteUrl(config, s3Session)
+
+	DeleteCNameRecord(config, route53Session, &AliasConfig{DNSName: *url, Region: *region})
 	DestroyBucket(config, s3Session)
 
 	return nil
