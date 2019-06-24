@@ -21,7 +21,7 @@ func main() {
 	option := strings.ToLower(os.Args[1])
 
 	if option != "create" && option != "delete" && option != "update" {
-		fmt.Printf("Unknown option %s, accepted options are create, update, delet\n", option)
+		fmt.Printf("Unknown option %s, accepted options are create, update, delete\n", option)
 		return
 	}
 
@@ -47,7 +47,8 @@ func main() {
 	} else if option == deploy.DELETE {
 		deploy.Cleanup(conf)
 	} else if option == deploy.UPDATE {
-		fmt.Println("update has not yet been implemented")
+		fmt.Println("Overwriting files in s3-bucket with new files")
+		deploy.Update(conf)
 	}
 
 }

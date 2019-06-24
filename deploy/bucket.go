@@ -129,10 +129,28 @@ func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 	return nil
 }
 
+// eu-north-1
+// eu-west-2
+// us-east-2
 // {bucket}.s3-website-<RegionName>.amazonaws.com
 // eu-west-1
 // us-west-1
 // us-west-2
+// us-east-1
+// {bucket}.s3-website.<RegionName>.amazonaws.com
+var s3BucketWebsiteURLResolver = map[string]string{
+	//Periods
+	"eu-north-1": "{bucket}.s3-website.<RegionName>.amazonaws.com",
+	"eu-west-2":  "{bucket}.s3-website.<RegionName>.amazonaws.com",
+	"us-east-2":  "{bucket}.s3-website.<RegionName>.amazonaws.com",
+
+	//Dashes
+	"eu-west-1": "{bucket}.s3-website-<RegionName>.amazonaws.com",
+	"us-west-1": "{bucket}.s3-website-<RegionName>.amazonaws.com",
+	"us-west-2": "{bucket}.s3-website-<RegionName>.amazonaws.com",
+	"us-east-1": "{bucket}.s3-website-<RegionName>.amazonaws.com",
+}
+
 func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) (*string, *string, error) {
 	output, err := s3Session.GetBucketLocation(&s3.GetBucketLocationInput{
 		Bucket: aws.String(config.BucketName),
@@ -143,7 +161,9 @@ func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) (*string
 		return nil, nil, err
 	}
 
-	url := config.BucketName + ".s3-website-" + *output.LocationConstraint + ".amazonaws.com"
+	preReplaceURL := s3BucketWebsiteURLResolver[*output.LocationConstraint]
+	url := strings.Replace(preReplaceURL, "{bucket}", config.BucketName, 1)
+	url = strings.Replace(url, "<RegionName>", *output.LocationConstraint, 1)
 	return &url, output.LocationConstraint, nil
 }
 

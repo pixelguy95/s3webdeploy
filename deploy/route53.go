@@ -85,6 +85,7 @@ func CreateCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, a
 
 func DeleteCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, aliasConfig *AliasConfig) {
 
+	fmt.Printf("%v\n%v\n", conf, aliasConfig)
 	change := &route53.Change{
 		ResourceRecordSet: &route53.ResourceRecordSet{
 
@@ -94,7 +95,7 @@ func DeleteCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, a
 			AliasTarget: &route53.AliasTarget{
 				EvaluateTargetHealth: aws.Bool(false),
 				DNSName:              aws.String(aliasConfig.DNSName),
-				HostedZoneId:         aws.String("Z1BKCTXD74EZPE"),
+				HostedZoneId:         aws.String(S3BucketHostedZoneMap[aliasConfig.Region]),
 			},
 		},
 		Action: aws.String(route53.ChangeActionDelete),

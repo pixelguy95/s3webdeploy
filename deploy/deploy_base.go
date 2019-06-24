@@ -70,3 +70,14 @@ func Cleanup(config *StaticWebConfig) error {
 
 	return nil
 }
+
+func Update(config *StaticWebConfig) error {
+	sess, err := GetNewSession(config)
+	if err != nil {
+		return err
+	}
+
+	UploadWebFolder(config, sess)
+
+	return nil
+}
