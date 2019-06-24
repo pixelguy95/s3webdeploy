@@ -48,6 +48,8 @@ var S3BucketHostedZoneMap = map[string]string{
 	"sa-east-1": "Z7KQH4QJS55SO",
 }
 
+// CreateCNameRecord takes a given hosted zone and creates a new CNAME record
+// that points to the given bucket.
 func CreateCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, aliasConfig *AliasConfig) {
 
 	fmt.Printf("Creating CNAME record with the name %s\n", conf.BucketName)
@@ -83,6 +85,8 @@ func CreateCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, a
 	fmt.Println("Created cname record")
 }
 
+// DeleteCNameRecord deletes a CNAME record pointing to a given bucket
+// from the given hosted zone,
 func DeleteCNameRecord(conf *StaticWebConfig, route53Session *route53.Route53, aliasConfig *AliasConfig) {
 
 	fmt.Printf("%v\n%v\n", conf, aliasConfig)

@@ -32,14 +32,16 @@ func CreateBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 	return nil
 }
 
-// PolicyJson gives public read access to a bucket
-const PolicyJson = "{\"Version\": \"2008-10-17\",\"Id\": \"PolicyForPublicWebsiteContent\",\"Statement\": [{\"Sid\": \"PublicReadGetObject\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"*\"},\"Action\": \"s3:GetObject\",\"Resource\": \"arn:aws:s3:::[BUCKETNAMEHERE]/*\"}]}"
+// PolicyJSON gives public read access to a bucket
+const PolicyJSON = "{\"Version\": \"2008-10-17\",\"Id\": \"PolicyForPublicWebsiteContent\",\"Statement\": [{\"Sid\": \"PublicReadGetObject\",\"Effect\": \"Allow\",\"Principal\": {\"AWS\": \"*\"},\"Action\": \"s3:GetObject\",\"Resource\": \"arn:aws:s3:::[BUCKETNAMEHERE]/*\"}]}"
 
+// SetBucketPermissions sets the read permission of the given bucket to
+// public.
 func SetBucketPermissions(config *StaticWebConfig, s3Session *s3.S3) error {
 
 	_, err := s3Session.PutBucketPolicy(&s3.PutBucketPolicyInput{
 		Bucket: aws.String(config.BucketName),
-		Policy: aws.String(strings.Replace(PolicyJson, "[BUCKETNAMEHERE]", config.BucketName, 1)),
+		Policy: aws.String(strings.Replace(PolicyJSON, "[BUCKETNAMEHERE]", config.BucketName, 1)),
 	})
 
 	if err != nil {
@@ -52,6 +54,9 @@ func SetBucketPermissions(config *StaticWebConfig, s3Session *s3.S3) error {
 	return nil
 }
 
+// UploadWebFolder loops through all the files in the given folder,
+// and uploads each with the correct key and mime-file-type to the
+// given bucket.
 func UploadWebFolder(config *StaticWebConfig, sess *session.Session) error {
 
 	uploader := s3manager.NewUploader(sess)
@@ -107,6 +112,7 @@ func UploadWebFolder(config *StaticWebConfig, sess *session.Session) error {
 	return nil
 }
 
+// CreateBucketWebsite configures the given bucket to act like a website
 func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 	output, err := s3Session.PutBucketWebsite(&s3.PutBucketWebsiteInput{
 		Bucket: aws.String(config.BucketName),
@@ -129,15 +135,13 @@ func CreateBucketWebsite(config *StaticWebConfig, s3Session *s3.S3) error {
 	return nil
 }
 
-// eu-north-1
-// eu-west-2
-// us-east-2
-// {bucket}.s3-website-<RegionName>.amazonaws.com
-// eu-west-1
-// us-west-1
-// us-west-2
-// us-east-1
-// {bucket}.s3-website.<RegionName>.amazonaws.com
+// s3BucketWebsiteURLResolver, for some reason the url that will be used for
+// the bucket website urls is inconsistent across different regions. The
+// aws sdk provides no support for figuring out the website url yourself,
+// so this map contains all the information needed for now.
+// TODO: Add all the missing regions
+// TODO: Remove the <RegionName> tag and just add the right region for
+// each element
 var s3BucketWebsiteURLResolver = map[string]string{
 	//Periods
 	"eu-north-1": "{bucket}.s3-website.<RegionName>.amazonaws.com",
@@ -151,7 +155,10 @@ var s3BucketWebsiteURLResolver = map[string]string{
 	"us-east-1": "{bucket}.s3-website-<RegionName>.amazonaws.com",
 }
 
-func ExtractBucketWebsiteUrl(config *StaticWebConfig, s3Session *s3.S3) (*string, *string, error) {
+// ExtractBucketWebsiteURL tries to generate the would be website url of
+// the given bucket. returns the url and the region of the given bucket.
+// If something went wrong it will return an error as well.
+func ExtractBucketWebsiteURL(config *StaticWebConfig, s3Session *s3.S3) (*string, *string, error) {
 	output, err := s3Session.GetBucketLocation(&s3.GetBucketLocationInput{
 		Bucket: aws.String(config.BucketName),
 	})
@@ -173,6 +180,11 @@ func DestroyBucket(config *StaticWebConfig, s3Session *s3.S3) error {
 	list, err := s3Session.ListObjects(&s3.ListObjectsInput{
 		Bucket: aws.String(config.BucketName),
 	})
+
+	if err != nil {
+		fmt.Printf("Unable to list elements in bucket bucket %q, %v", config.BucketName, err)
+		return err
+	}
 
 	for _, l := range list.Contents {
 		s3Session.DeleteObject(&s3.DeleteObjectInput{

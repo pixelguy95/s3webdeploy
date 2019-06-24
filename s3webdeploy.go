@@ -8,6 +8,7 @@ import (
 	"github.com/pixelguy95/s3webdeploy/deploy"
 )
 
+// Entry point of the program
 func main() {
 
 	if len(os.Args) < 2 {
@@ -53,6 +54,12 @@ func main() {
 
 }
 
+// handleConfigFile loads the correct configuration file and parses it.
+// in case of no config file found or malformed config file throws
+// appropriate error.
+// Also does a sanity check on the given configurations to see if they make
+// any sense. If not throw nice error
+// Otherwise returns pointer to new config struct
 func handleConfigFile(option string) (*deploy.StaticWebConfig, error) {
 	confFile := "./config.json"
 	if len(os.Args) == 3 {
