@@ -77,11 +77,7 @@ func (conf *StaticWebConfig) SanityCheck(option string) error {
 		conf.Subdomain = conf.Subdomain + "."
 	}
 
-	if strings.HasPrefix(conf.Subdomain, "www.") {
-		conf.Subdomain = strings.TrimPrefix(conf.Subdomain, "www.")
-	}
-
-	conf.BucketName = "www." + conf.Subdomain + strings.TrimSuffix(*output.HostedZone.Name, ".")
+	conf.BucketName = conf.Subdomain + strings.TrimSuffix(*output.HostedZone.Name, ".")
 
 	if option == CREATE {
 		_, err := s3Session.HeadBucket(&s3.HeadBucketInput{

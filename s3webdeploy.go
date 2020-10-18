@@ -43,13 +43,22 @@ func main() {
 		}
 
 		fmt.Println("SUCCSESS!")
-		fmt.Println("It might take a few minutes before DNS updates")
+		fmt.Println("DNS records might take a few minutes to update")
 
 	} else if option == deploy.DELETE {
 		deploy.Cleanup(conf)
+		if err != nil {
+			fmt.Println("SUCCSESS!")
+			fmt.Println("DNS records might take a few minutes to update")
+		}
+
 	} else if option == deploy.UPDATE {
 		fmt.Println("Overwriting files in s3-bucket with new files")
 		deploy.Update(conf)
+		if err != nil {
+			fmt.Println("SUCCSESS!")
+			fmt.Println("All files overwritten")
+		}
 	}
 
 }
